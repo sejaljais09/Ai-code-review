@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardLayout name={session.user?.name || "User"}>
-      <div className="rounded-xl bg-white p-8 shadow-sm">
+      <div className="rounded-xl bg-white p-8 shadow-sm margin-bottom-6">
         <h1 className="text-3xl font-bold">
           Welcome, {session.user?.name} 
         </h1>
@@ -20,6 +20,7 @@ export default async function DashboardPage() {
           Start reviewing your code with AI.
         </p>
       </div>
+    <DashboardContent/>
     </DashboardLayout>
   );
 }
