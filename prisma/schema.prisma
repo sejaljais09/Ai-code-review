@@ -18,13 +18,24 @@ model User {
 }
 
 model Review {
-  id         String   @id @default(cuid())
-  language   String
-  sourceCode String
-  aiFeedback String?
-  score      Int?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String   @id @default(cuid())
+
+  code             String
+  language         String
+
+  score            Int
+  summary          String
+
+  timeComplexity   String
+  spaceComplexity  String
+
+  bugs             Json
+  suggestions      Json
+
+  improvedCode     String
+
+  createdAt        DateTime @default(now())
+
+  userId           String
+  user             User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

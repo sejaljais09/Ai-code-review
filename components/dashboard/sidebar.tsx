@@ -19,7 +19,7 @@ const menu = [
   },
   {
     name: "History",
-    href: "/history",
+    href: "/dashboard/history",
     icon: History,
   },
   {

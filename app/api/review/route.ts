@@ -1,5 +1,7 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 const client = new OpenAI({
   apiKey: process.env.GROQ_API_KEY!,
@@ -8,7 +10,26 @@ const client = new OpenAI({
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
+     if (!session?.user?.email) {
+        return NextResponse.json(
+    { message: "Unauthorized" },
+    { status: 401 }
+  );
+}
     const { code } = await req.json();
+    const user = await prisma.user.findUnique({
+    where: {
+    email: session.user.email,
+  },
+});
+
+if (!user) {
+  return NextResponse.json(
+    { message: "User not found" },
+    { status: 404 }
+  );
+}
 
     if (!code) {
       return NextResponse.json(
@@ -57,8 +78,29 @@ const cleanReview = review
   .replace(/```/g, "")
   .trim();
 
+const parsedReview = JSON.parse(cleanReview);
+
+await prisma.review.create({
+  data: {
+    code,
+    language: "Java",
+
+    score: parsedReview.score,
+    summary: parsedReview.summary,
+
+    timeComplexity: parsedReview.timeComplexity,
+    spaceComplexity: parsedReview.spaceComplexity,
+
+    bugs: parsedReview.bugs,
+    suggestions: parsedReview.suggestions,
+
+    improvedCode: parsedReview.improvedCode,
+
+    userId: user.id,
+  },
+});
 return NextResponse.json({
-  review: JSON.parse(cleanReview),
+ review: parsedReview
 });
   } catch (error: any) {
     console.error(error);
