@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/dashboard-layout";
 import DashboardContent from "@/components/dashboard/dashboard-content";
@@ -8,6 +9,39 @@ export default async function DashboardPage() {
   if (!session) {
     redirect("/login");
   }
+  const user = await prisma.user.findUnique({
+  where: {
+    email: session.user?.email!,
+  },
+});
+
+if (!user) {
+  redirect("/login");
+}
+const reviews = await prisma.review.findMany({
+  where: {
+    userId: user.id,
+  },
+});
+const totalReviews = reviews.length;
+
+const averageScore =
+  totalReviews === 0
+    ? 0
+    : Math.round(
+        reviews.reduce((sum, review) => sum + review.score, 0) /
+          totalReviews
+      );
+
+const totalBugs = reviews.reduce(
+  (sum, review) => sum + (review.bugs as any[]).length,
+  0
+);
+
+const totalSuggestions = reviews.reduce(
+  (sum, review) => sum + (review.suggestions as any[]).length,
+  0
+);
 
   return (
     <DashboardLayout name={session.user?.name || "User"}>
@@ -20,7 +54,14 @@ export default async function DashboardPage() {
           Start reviewing your code with AI.
         </p>
       </div>
-    <DashboardContent/>
+    <DashboardContent
+  stats={{
+    totalReviews,
+    averageScore,
+    totalBugs,
+    totalSuggestions,
+  }}
+/>
     </DashboardLayout>
   );
 }

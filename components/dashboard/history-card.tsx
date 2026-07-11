@@ -66,9 +66,11 @@ export default function HistoryCard({
           </h2>
 
           <p className="text-gray-500">
-            {new Date(
-              review.createdAt
-            ).toLocaleString()}
+            {new Date(review.createdAt).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
           </p>
 
           <p className="mt-4 text-gray-700">

@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/dashboard-layout";
 import Link from "next/link";
 import HistoryCard from "@/components/dashboard/history-card";
+import HistoryList from "@/components/dashboard/history-list";
+import EmptyState from "@/components/dashboard/empty-state";
 
 export default async function HistoryPage() {
   const session = await auth();
@@ -40,17 +42,11 @@ export default async function HistoryPage() {
         </h1>
 
         {reviews.length === 0 ? (
-          <div className="rounded-xl border bg-white p-10 text-center">
-            No reviews yet.
-          </div>
+          <EmptyState />
         ) : (
-         reviews.map((review) => (
-         <HistoryCard
-          key={review.id}
-          review={review}
-         />
-        ))
+         <HistoryList reviews={reviews} />
         )}
+      
 
       </div>
     </DashboardLayout>
