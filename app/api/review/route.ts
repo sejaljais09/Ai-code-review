@@ -38,19 +38,45 @@ if (!user) {
       );
     }
 
-    const prompt = `
+   const prompt = `
 You are a Senior Java Code Reviewer.
 
 Analyze the following Java code.
 
-Return ONLY valid JSON.
+Return ONLY a valid JSON object.
+
+Rules:
+- Do NOT wrap the response in markdown.
+- Do NOT use \`\`\`json.
+- The response must be valid JSON.
+- "bugs" must be an array of strings.
+- "suggestions" must be an array of strings.
+- "improvedCode" must be a STRING.
+- Preserve Java formatting.
+- Use \\n for new lines and proper indentation.
+Identify Java code smells such as:
+- Long Method
+- Magic Numbers
+- Poor Variable Naming
+- Duplicate Code
+- Dead Code
+- Deep Nesting
+- Large Class
+- Empty Catch Blocks
+- Unused Variables
+- Missing Validation
+
+Return them in the "codeSmells" array.
+
+JSON format:
 
 {
-  "score": number,
+  "score": 0,
   "summary": "",
   "timeComplexity": "",
   "spaceComplexity": "",
   "bugs": [],
+  "codeSmells":[],
   "suggestions": [],
   "improvedCode": ""
 }
@@ -60,15 +86,17 @@ Java Code:
 ${code}
 `;
 
-   const completion = await client.chat.completions.create({
+ const completion = await client.chat.completions.create({
   model: "llama-3.3-70b-versatile",
+  response_format: {
+    type: "json_object",
+  },
   messages: [
     {
       role: "user",
       content: prompt,
     },
   ],
-  temperature: 0.2,
 });
 
 const review = completion.choices[0].message.content ?? "";
@@ -78,7 +106,28 @@ const cleanReview = review
   .replace(/```/g, "")
   .trim();
 
-const parsedReview = JSON.parse(cleanReview);
+console.log("========== AI RESPONSE ==========");
+console.log(cleanReview);
+console.log("================================");
+
+let parsedReview;
+
+try {
+  parsedReview = JSON.parse(cleanReview);
+} catch (err) {
+  console.error("Invalid JSON returned by AI");
+  console.log(cleanReview);
+
+  return NextResponse.json(
+    {
+      message: "AI returned invalid JSON",
+      raw: cleanReview,
+    },
+    {
+      status: 500,
+    }
+  );
+}
 
 await prisma.review.create({
   data: {
@@ -92,6 +141,7 @@ await prisma.review.create({
     spaceComplexity: parsedReview.spaceComplexity,
 
     bugs: parsedReview.bugs,
+    codeSmells:parsedReview.codeSmells,
     suggestions: parsedReview.suggestions,
 
     improvedCode: parsedReview.improvedCode,

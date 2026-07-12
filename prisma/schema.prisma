@@ -30,8 +30,8 @@ model Review {
   spaceComplexity  String
 
   bugs             Json
+  codeSmells        Json?
   suggestions      Json
-
   improvedCode     String
 
   createdAt        DateTime @default(now())

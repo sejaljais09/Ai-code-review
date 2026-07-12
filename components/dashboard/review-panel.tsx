@@ -2,6 +2,8 @@
 
 import Editor from "@monaco-editor/react";
 import ScoreCircle from "./score-circle";
+import toast from "react-hot-toast";
+import { ScanSearch } from "lucide-react";
 import {
   Bug,
   CheckCircle2,
@@ -10,7 +12,10 @@ import {
   Sparkles,
   Star,
   Copy,
+  Download,
+  FileText,
 } from "lucide-react";
+import jsPDF from "jspdf"
 
 type Review = {
   score: number;
@@ -18,6 +23,7 @@ type Review = {
   timeComplexity: string;
   spaceComplexity: string;
   bugs: string[];
+  codeSmells:string[];
   suggestions: string[];
   improvedCode: string;
 };
@@ -30,7 +36,70 @@ export default function ReviewPanel({ review }: Props) {
     const copyCode = async () => {
   await navigator.clipboard.writeText(review.improvedCode);
 
-  alert("Improved code copied!");
+  toast.success("Improved code copied!");
+};
+const downloadMarkdown = () => {
+  const markdown = `
+# AI Code Review
+
+## Score
+${review.score}
+
+## Summary
+${review.summary}
+
+## Time Complexity
+${review.timeComplexity}
+
+## Space Complexity
+${review.spaceComplexity}
+
+## Bugs
+${review.bugs.map((b) => "- " + b).join("\n")}
+
+## Suggestions
+${review.suggestions.map((s) => "- " + s).join("\n")}
+
+## Improved Code
+
+\`\`\`java
+${review.improvedCode}
+\`\`\`
+`;
+
+  const blob = new Blob([markdown], {
+    type: "text/markdown",
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "review.md";
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
+
+const downloadPDF = () => {
+  const pdf = new jsPDF();
+
+  pdf.setFontSize(18);
+  pdf.text("AI Code Review", 10, 20);
+
+  pdf.setFontSize(12);
+
+  let y = 35;
+
+  pdf.text(`Score: ${review.score}`, 10, y);
+
+  y += 10;
+
+  pdf.text(`Summary: ${review.summary}`, 10, y, {
+    maxWidth: 180,
+  });
+
+  pdf.save("review.pdf");
 };
   return (
     <div className="mt-8 space-y-6">
@@ -109,7 +178,7 @@ export default function ReviewPanel({ review }: Props) {
 
           {review.bugs.length === 0 ? (
             <p className="text-green-600 font-medium">
-              ✅ No bugs found
+               No bugs found
             </p>
           ) : (
             review.bugs.map((bug, index) => (
@@ -125,7 +194,34 @@ export default function ReviewPanel({ review }: Props) {
         </div>
 
       </div>
+      {/* code smells */}
+       <div className="rounded-xl border bg-white p-6 shadow-sm">
 
+     <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+     <ScanSearch className="text-orange-500" />
+     Code Smells
+    </h3>
+
+  <div className="space-y-3">
+
+    {review.codeSmells.length === 0 ? (
+      <p className="font-medium text-green-600">
+         No code smells detected
+      </p>
+    ) : (
+      review.codeSmells.map((smell: string, index: number) => (
+        <div
+          key={index}
+          className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-orange-700"
+        >
+          {smell}
+        </div>
+      ))
+    )}
+
+  </div>
+
+</div>
       {/* Suggestions */}
 
       <div className="rounded-xl border bg-white p-6 shadow-sm">
@@ -164,6 +260,21 @@ export default function ReviewPanel({ review }: Props) {
       <Copy size={18} />
       Copy
     </button>
+    <button
+  onClick={downloadMarkdown}
+  className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+>
+  <Download size={18} />
+  Markdown
+</button>
+
+<button
+  onClick={downloadPDF}
+  className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+>
+  <FileText size={18} />
+  PDF
+</button>
 
   </div>
 

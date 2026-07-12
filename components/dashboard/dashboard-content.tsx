@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import {
   FileCode2,
   Star,
@@ -12,6 +13,7 @@ import CodeEditor from "./code-editor";
 import { sampleJava } from "@/lib/sample-java";
 import ReviewPanel from "./review-panel";
 import ReviewSkeleton from "./review-skeleton";
+import toast from "react-hot-toast";
 
 type DashboardContentProps = {
   stats: {
@@ -46,8 +48,10 @@ export default function DashboardContent({
     const data = await res.json();
 
     setReview(data.review);
+    toast.success("Code reviewed successfully!");
   } catch (err) {
     console.error(err);
+    toast.error("Failed to review code.");
   } finally {
     setLoading(false);
   }
