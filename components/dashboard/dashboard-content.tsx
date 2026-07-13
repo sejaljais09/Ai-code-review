@@ -156,12 +156,6 @@ const handleFileUpload = (
 )}
     <div className="flex items-center justify-between">
 
-  <button
-    onClick={() => fileInputRef.current?.click()}
-    className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 bg-white text-2xl font-medium transition hover:bg-gray-100"
-  >
-    +
-  </button>
 
   <div className="flex gap-3">
 
@@ -180,12 +174,7 @@ const handleFileUpload = (
       {loading ? "Reviewing..." : "Review Java Code"}
     </button>
 
-    <button
-      onClick={generateDocumentation}
-      className="rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition hover:bg-green-700"
-    >
-      Generate Documentation
-    </button>
+   
 
   </div>
 
