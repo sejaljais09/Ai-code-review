@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, Code2, History, Settings } from "lucide-react";
+import { LayoutDashboard, Code2, History, Settings, BarChart3 } from "lucide-react";
 import { usePathname } from "next/navigation";
-
 
 
 const menu = [
@@ -27,6 +26,11 @@ const menu = [
     href: "/settings",
     icon: Settings,
   },
+  {
+  name: "Analytics",
+  href: "/dashboard/analytics",
+  icon: BarChart3,
+}
 ];
 
 export default function Sidebar() {

@@ -9,6 +9,8 @@ import {
   Bug,
   Loader2,
   Lightbulb,
+  Paperclip,
+  Search,
 } from "lucide-react";
 import CodeEditor from "./code-editor";
 //import { sampleJava } from "@/lib/sample-java";
@@ -29,22 +31,31 @@ type DashboardContentProps = {
 export default function DashboardContent({
   stats,
 }: DashboardContentProps) {
+  const [showEditor, setShowEditor] = useState(false);
+  const [inputCode, setInputCode] = useState("");
   const [code, setCode] = useState("");
+
   const [review, setReview] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [documentation, setDocumentation] =useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const handleReview = async () => {
-  if (!code.trim()) return;
+  
+ const handleReview = async (codeToReview: string) => {
+  if (!codeToReview.trim()) return;
+
   setLoading(true);
+
   try {
     const res = await fetch("/api/review", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({
+        code: codeToReview,
+      }),
     });
+
     const data = await res.json();
 
     setReview(data.review);
@@ -66,8 +77,9 @@ const handleFileUpload = (
   const reader = new FileReader();
 
   reader.onload = (e) => {
-    setCode((e.target?.result as string) || "");
-  };
+  const content = (e.target?.result as string) || "";
+  setInputCode(content);
+};
 
   reader.readAsText(file);
 
@@ -90,77 +102,58 @@ const handleFileUpload = (
 };
   return (
     <>
-    <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      <div>
-        <p className="text-sm text-gray-500">Total Reviews</p>
-        <h2 className="mt-2 text-3xl font-bold">
-          {stats.totalReviews}
-        </h2>
-      </div>
+  
+    <div className="space-y-6 rounded-xl bg-white p-8 shadow-sm">
+      <div className="rounded-full border bg-white px-5 py-3 shadow-sm">
 
-      <FileCode2 className="text-blue-600" size={34} />
-    </div>
-  </div>
+  <div className="flex items-center">
 
-  <div className="rounded-xl border bg-white p-6 shadow-sm">
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      <div>
-        <p className="text-sm text-gray-500">Average Score</p>
-        <h2 className="mt-2 text-3xl font-bold">
-          {stats.averageScore}
-        </h2>
-      </div>
+    <Paperclip
+      size={22}
+      className="cursor-pointer text-gray-500 hover:text-blue-600"
+      onClick={() => fileInputRef.current?.click()}
+    />
 
-      <Star className="text-yellow-500" size={34} />
-    </div>
-  </div>
+    <textarea
+  value={inputCode}
+  onChange={(e) => setInputCode(e.target.value)}
+  placeholder="Paste your Java code here..."
+  rows={4}
+  className="flex-1 resize-none border-none bg-transparent outline-none"
+/>
 
-  <div className="rounded-xl border bg-white p-6 shadow-sm">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm text-gray-500">Bugs Found</p>
-        <h2 className="mt-2 text-3xl font-bold">
-          {stats.totalBugs}
-        </h2>
-      </div>
+   <Search
+  size={22}
+  className="cursor-pointer text-blue-600 hover:text-blue-700"
+  onClick={() => {
+    if (!inputCode.trim()) return;
 
-      <Bug className="text-red-500" size={34} />
-    </div>
-  </div>
+    const codeToReview = inputCode;
 
-  <div className="rounded-xl border bg-white p-6 shadow-sm">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm text-gray-500">Suggestions</p>
-        <h2 className="mt-2 text-3xl font-bold">
-          {stats.totalSuggestions}
-        </h2>
-      </div>
+    // Move code to Monaco
+    setCode(codeToReview);
 
-      <Lightbulb className="text-green-600" size={34} />
-    </div>
+    // Clear the search bar
+    setInputCode("");
+
+    // Show the editor
+    setShowEditor(true);
+
+    // Review the code
+    handleReview(codeToReview);
+  }}
+/>
+
   </div>
 
 </div>
-    <div className="space-y-6 rounded-xl bg-white p-8 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">
-            AI Code Review
-          </h1>
-          <p className="mt-1 text-gray-500">
-            Language: <span className="font-semibold text-blue-600">Java</span>
-          </p>
-        </div>
-      </div>
-
-      <CodeEditor
-        language="java"
-        value={code}
-        onChange={setCode}
-      />
+      {showEditor && (
+  <CodeEditor
+    language="java"
+    value={code}
+    onChange={setCode}
+  />
+)}
     <div className="flex items-center justify-between">
 
   <button
@@ -173,7 +166,7 @@ const handleFileUpload = (
   <div className="flex gap-3">
 
     <button
-      onClick={handleReview}
+      onClick={() => handleReview(inputCode)}
       disabled={loading}
       className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
     >
