@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
 
 export default function Hero() {
   return (
@@ -13,11 +15,14 @@ export default function Hero() {
       </p>
 
       <div className="mt-8 flex gap-4">
-        <Button size="lg">Start Reviewing</Button>
-
-        <Button variant="outline" size="lg">
+         <Link href="/login">
+        <Button size="lg" >Start Reviewing </Button>
+         </Link>
+          <Link href="#features">
+          <Button variant="outline" size="lg">
           Learn More
         </Button>
+         </Link>
       </div>
     </section>
   );

@@ -20,16 +20,16 @@ import toast from "react-hot-toast";
 import ReactMarkdown from "react-markdown";
 //import { text } from "stream/consumers";
 
-type DashboardContentProps = {
-  stats: {
-    totalReviews: number;
-    averageScore: number;
-    totalBugs: number;
-    totalSuggestions: number;
-  };
-};
+// type DashboardContentProps = {
+//   stats: {
+//     totalReviews: number;
+//     averageScore: number;
+//     totalBugs: number;
+//     totalSuggestions: number;
+//   };
+// };
 export default function DashboardContent({
-  stats,
+  
 }: DashboardContentProps) {
   const [showEditor, setShowEditor] = useState(false);
   const [inputCode, setInputCode] = useState("");
