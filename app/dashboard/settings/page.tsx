@@ -1,8 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
-import DashboardLayout from "@/components/dashboard/dashboard-layout";
-import SettingsContent from "@/components/dashboard/settings-content";
+import SettingsLayout from "@/components/settings/settings-layout";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -12,13 +11,11 @@ export default async function SettingsPage() {
   }
 
   return (
-    <DashboardLayout name={session.user.name ?? "User"}>
-      <SettingsContent
-        user={{
-          name: session.user.name ?? "",
-          email: session.user.email ?? "",
-        }}
-      />
-    </DashboardLayout>
+    <SettingsLayout
+      user={{
+        name: session.user.name ?? "",
+        email: session.user.email ?? "",
+      }}
+    />
   );
 }
